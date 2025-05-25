@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ServicesConfigFactory } from './config/service.configuration';
 import { AuthConfigFactory } from './config/auth.configuration';
 import { ConfigModule } from '@nestjs/config';
+import { MetallModule } from './metall/metall.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     AuthModule,
     UsersModule,
+    MetallModule,
   ],
   controllers: [],
   providers: [
