@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @unique @default(uuid())
+  companyId String
+  addressId String     @unique
+  username  String     @unique @db.VarChar(255)
+  fullName  String     @db.VarChar(255)
+  email     String?    @unique
+  hash      String
+  phone     String?
+  notes     String?
+  method    String?
+  userGroup UserGroup?
+  active    Boolean    @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  address Address @relation(fields: [addressId], references: [id])
+}
+
+model Address {
+  id       String  @id @unique @default(uuid())
+  state    String?
+  city     String?
+  zip      String?
+  address1 String?
+  address2 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User?
+}
+
+model Token {
+  id    String @id @unique @default(uuid())
+  token String
+}
+
+model UserGroup {
+  userId  String @unique
+  groupId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+}
+
+model Group {
+  id   Int    @id @unique
+  role String
+
+  userGroup UserGroup[]
+}
+
+model MetalProduct {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  category     String
+  material     String
+  grade        String?
+  standard     String?
+  surface      String?
+  coating      String?
+  shape        String
+  length       Float?
+  width        Float?
+  height       Float?
+  diameter     Float?
+  thickness    Float?
+  weight       Float?
+  unit         String
+  quantity     Int
+  pricePerUnit Float?
+  supplierId   Int?
+  warehouseId  Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  warehouse      Warehouse?      @relation(fields: [warehouseId], references: [id])
+  priceHistory   PriceHistory[]
+  images         ProductImage[]
+  stockMovements StockMovement[]
+}
+
+model Supplier {
+  id            Int      @id @default(autoincrement())
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  createdAt     DateTime @default(now())
+
+  products MetalProduct[]
+}
+
+model Warehouse {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String
+  manager   String?
+  phone     String?
+  createdAt DateTime @default(now())
+
+  products      MetalProduct[]
+  movementsFrom StockMovement[] @relation("FromWarehouse")
+  movementsTo   StockMovement[] @relation("ToWarehouse")
+}
+
+model PriceHistory {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  price         Float
+  effectiveFrom DateTime
+  createdAt     DateTime @default(now())
+
+  product MetalProduct @relation(fields: [productId], references: [id])
+}
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  url         String
+  description String?
+  createdAt   DateTime @default(now())
+
+  product MetalProduct @relation(fields: [productId], references: [id])
+}
+
+model StockMovement {
+  id              Int      @id @default(autoincrement())
+  productId       Int
+  fromWarehouseId Int?
+  toWarehouseId   Int?
+  quantity        Int
+  movedAt         DateTime @default(now())
+  comment         String?
+
+  product       MetalProduct @relation(fields: [productId], references: [id])
+  fromWarehouse Warehouse?   @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse?   @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
+}
