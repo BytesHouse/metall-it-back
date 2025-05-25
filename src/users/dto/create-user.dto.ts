@@ -17,5 +17,4 @@ export class CreateUserDto implements Omit<UserData, 'id'>, AddressData {
   address1: string | null;
   address2: string | null;
   method: string | null;
-  permissions: Permissions;
 }
