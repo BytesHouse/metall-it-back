@@ -20,7 +20,7 @@ import { ChangePasswordRequest } from './dto/change-password.request.dto';
 import { Public } from './decorator/public.decorator';
 import { Roles } from './decorator/roles.decorator';
 import { Role } from './enums/role.enum';
-import { PayloadCompany, PayloadRole, PayloadUser } from './auth.constants';
+import { PayloadRole, PayloadUser } from './auth.constants';
 
 @Controller('auth')
 export class AuthController {
@@ -28,18 +28,10 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  @Roles(Role.Admin)
   async register(
-    @Headers('Authorization') auth: string,
-    @PayloadCompany() companyId: string | undefined,
-    @Headers(PayloadRole) payloadRole: string,
     @Body() registerRequest: RegisterUserRequest,
   ): Promise<RegisterUserResponse> {
-    const userId = await this.authService.register(
-      auth,
-      companyId,
-      registerRequest,
-    );
+    const userId = await this.authService.register(registerRequest);
     if (!userId) {
       throw new InternalServerErrorException(
         {},
@@ -59,7 +51,6 @@ export class AuthController {
     const token = await this.authService.login(
       loginRequest.username,
       loginRequest.password,
-      loginRequest.role,
     );
     return new LoginUserResponse(token);
   }
