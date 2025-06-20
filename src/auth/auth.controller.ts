@@ -26,6 +26,7 @@ import { PayloadRole, PayloadUser } from './auth.constants';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async register(
