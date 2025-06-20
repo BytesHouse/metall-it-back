@@ -15,7 +15,6 @@ import { TokenSignOptions } from 'src/token/entities/token-sign-options.entity';
 import { generateUserEmail } from 'src/utils/utils';
 import { Role } from './enums/role.enum';
 import { AuthConfig, AuthInjectToken } from 'src/config/auth.configuration';
-import { NIL as NIL_UUID } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -27,11 +26,7 @@ export class AuthService {
     @AuthInjectToken() private readonly authConfig: AuthConfig,
   ) {}
 
-  async register(
-    auth: string,
-    companyId: string | undefined,
-    user: RegisterUserRequest,
-  ): Promise<string> {
+  async register(user: RegisterUserRequest): Promise<string> {
     this.logger.debug('Registering the new user');
 
     const hashedPswd = await hash(user.password, 10);
@@ -39,40 +34,11 @@ export class AuthService {
     const userId = await this.userService.create({
       ...user,
       hash: hashedPswd,
-      companyId,
     });
-    if (user.email) {
-      const companyData = undefined;
-      try {
-      } catch (error) {
-        this.logger.debug(`No company found: ${error}`);
-      }
-      const fd = new FormData();
-      fd.append('to', user.email);
-      fd.append(
-        'subject',
-        `You have been invited by ${companyData?.name || ''} to become a user`,
-      );
-      fd.append('emailType', 'noreply');
-      fd.append(
-        'content',
-        generateUserEmail(
-          `Message text`,
-          this.authConfig.emailOrigin || '',
-          'Start working',
-        ),
-      );
-      //   To-DO
-      // send Email
-    }
     return userId;
   }
 
-  async login(
-    username: string,
-    password: string,
-    role: string | undefined,
-  ): Promise<string> {
+  async login(username: string, password: string): Promise<string> {
     this.logger.debug(
       `User "${username}" trying to login with password ${password}`,
     );
@@ -93,9 +59,7 @@ export class AuthService {
         `User "${username}" is not assigned to any group`,
       );
     }
-    if (role && role !== userRole) {
-      throw new ForbiddenException(`You don't have access`);
-    }
+
     this.logger.debug(user);
     return await this.updateToken(user.id, user.companyId, userRole);
   }
