@@ -45,10 +45,10 @@ export class UsersService {
     const createdUser = await this.dbService.user.create({
       data: {
         id: userId,
-        companyId: createUser.companyId,
+        companyId: createUser.companyId || 'metal-it',
         hash: createUser.hash,
         username: createUser.username,
-        fullName: createUser.fullName,
+        fullName: createUser.fullName || 'NoNa',
         email: createUser.email,
         phone: createUser.phone,
         active: createUser.active,
